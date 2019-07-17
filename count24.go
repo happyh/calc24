@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -26,6 +27,8 @@ func calc(a, b float64, fun byte) float64 {
 	return r
 }
 
+var MINFLOAT64 = 0.0000000001
+
 func dsf2(value []float64, str []string, showAll bool, resultNumber float64) bool {
 	result := false
 	for i, v1 := range value {
@@ -33,7 +36,8 @@ func dsf2(value []float64, str []string, showAll bool, resultNumber float64) boo
 			if i != j {
 				for _, f := range fun {
 					v := calc(v1, v2, f)
-					if len(value) == 2 && v == resultNumber {
+					if len(value) == 2 && math.Abs(v-resultNumber) < MINFLOAT64 {
+						//fmt.Println("v:", v, ",r:", resultNumber)
 						fmt.Printf("(%s%s%s)\n", str[i], string(f), str[j])
 						if showAll {
 							result = true
