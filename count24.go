@@ -2,11 +2,14 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
 )
+
+var fun [4]byte = [4]byte{'+', '-', '*', '/'}
 
 func calc(a, b float64, fun byte) float64 {
 	r := 0.0
@@ -23,15 +26,20 @@ func calc(a, b float64, fun byte) float64 {
 	return r
 }
 
-func dsf2(value []float64, str []string) bool {
+func dsf2(value []float64, str []string, showAll bool, resultNumber float64) bool {
+	result := false
 	for i, v1 := range value {
 		for j, v2 := range value {
 			if i != j {
 				for _, f := range fun {
 					v := calc(v1, v2, f)
-					if len(value) == 2 && v == 24.0 {
+					if len(value) == 2 && v == resultNumber {
 						fmt.Printf("(%s%s%s)\n", str[i], string(f), str[j])
-						return true
+						if showAll {
+							result = true
+						} else {
+							return true
+						}
 					} else if len(value) > 2 {
 						begin := i
 						end := j
@@ -53,24 +61,34 @@ func dsf2(value []float64, str []string) bool {
 						funstr := fmt.Sprintf("(%s%s%s)", str[i], string(f), str[j])
 						s2 = append(s2, funstr)
 
-						if dsf2(s, s2) {
-							return true
+						if dsf2(s, s2, showAll, resultNumber) {
+							if showAll {
+								result = true
+							} else {
+								return true
+							}
 						}
 					}
 				}
 			}
 		}
 	}
-	return false
+	return result
 }
 
-var fun [4]byte
-
 func main() {
-	fun[0] = '+'
-	fun[1] = '-'
-	fun[2] = '*'
-	fun[3] = '/'
+	var resultNumber int
+	flag.IntVar(&resultNumber, "n", 24, "result number")
+	var showAll bool
+	flag.BoolVar(&showAll, "a", false, "show all")
+	var showHelp bool
+	flag.BoolVar(&showHelp, "h", false, "help")
+	flag.Parse()
+
+	if showHelp {
+		flag.Usage()
+		return
+	}
 
 	var str string
 
@@ -104,8 +122,8 @@ func main() {
 			sStr = append(sStr, v)
 		}
 		if checked {
-			if !dsf2(sInt, sStr) {
-				fmt.Println("不能生成24！")
+			if !dsf2(sInt, sStr, showAll, float64(resultNumber)) {
+				fmt.Println("不能生成" + strconv.Itoa(resultNumber) + "！")
 			}
 		}
 		str = ""
